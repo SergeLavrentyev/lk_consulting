@@ -12,9 +12,9 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
-    protected const CLIENT_TYPE = 'ContractorHuman';
-    protected const COMPANY_TYPE = 'ContractorCompany';
-    protected const MANAGER_TYPE = 'Employee';
+    public const CLIENT_TYPE = 'ContractorHuman';
+    public const COMPANY_TYPE = 'ContractorCompany';
+    public const MANAGER_TYPE = 'Employee';
 
     public const CLIENT_ROLE = 'client';
     public const COMPANY_ROLE = 'company';
