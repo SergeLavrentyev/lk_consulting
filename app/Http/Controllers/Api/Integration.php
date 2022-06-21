@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Models\{Comment, Invoice, Offer, Order, Task, User};
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Queue;
 
 class Integration extends \App\Http\Controllers\Controller
 {
@@ -34,34 +35,36 @@ class Integration extends \App\Http\Controllers\Controller
     {
         $body = $request->all();
 
-        $uuid = $body['uuid'];
-        $extModel = $body['model'];
-        $event = $this->event[$body['event']];
+        Queue::push('hook', $body);
 
-        if (cache()->has($uuid)) {
-            return response('duplicate');
-        }
+//        $uuid = $body['uuid'];
+//        $extModel = $body['model'];
+//        $event = $this->event[$body['event']];
 
-        cache()->add($uuid, $body['model'], 600);
+//        if (cache()->has($uuid)) {
+//            return response('duplicate');
+//        }
+//
+//        cache()->add($uuid, $body['model'], 600);
 
-        $success = false;
+        $success = true;
 
-        try {
-            $model = $this->modelNamespace . $this->models[$extModel];
-
-            $data = $model::prepareData($body['data']);
-
-            $result = match ($event) {
-                Integration::EVENT_DROPPED => $model::where('ext_id', $data['ext_id'])->delete(),
-                Integration::EVENT_UPDATED => $model::where('ext_id', $data['ext_id'])->update($data),
-                Integration::EVENT_CREATED => $model::create($data)
-            };
-
-            $success = !empty($result);
-        } catch (\Exception $e) {
-            // TODO: error log
-            cache()->delete($uuid);
-        }
+//        try {
+//            $model = $this->modelNamespace . $this->models[$extModel];
+//
+//            $data = $model::prepareData($body['data']);
+//
+//            $result = match ($event) {
+//                Integration::EVENT_DROPPED => $model::where('ext_id', $data['ext_id'])->delete(),
+//                Integration::EVENT_UPDATED => $model::where('ext_id', $data['ext_id'])->update($data),
+//                Integration::EVENT_CREATED => $model::create($data)
+//            };
+//
+//            $success = !empty($result);
+//        } catch (\Exception $e) {
+//            // TODO: error log
+//            cache()->delete($uuid);
+//        }
 
         $statusCode = $success ? 200 : 422;
         return response('', $statusCode);
